@@ -1,0 +1,19 @@
+{
+  "name": "backend-utils",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "backend/utils/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/backend/utils",
+        "main": "backend/utils/src/index.ts",
+        "tsConfig": "backend/utils/tsconfig.lib.json",
+        "assets": ["backend/utils/*.md"]
+      }
+    }
+  }
+}

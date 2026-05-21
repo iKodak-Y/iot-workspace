@@ -16,6 +16,16 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "customConditions": ["@iot-workspace/source"]
+    "customConditions": ["@iot-workspace/source"],
+    "paths": {
+      "@iot-workspace/shared": ["./shared/src/index.ts"],
+      "@iot-workspace/interfaces": ["./shared/interfaces/src/index.ts"],
+      "@iot-workspace/data-access": ["./frontend/data-access/src/index.ts"],
+      "@iot-workspace/ui": ["./frontend/ui/src/index.ts"],
+      "@iot-workspace/utils": ["./frontend/utils/src/index.ts"],
+      "@iot-workspace/core": ["./backend/core/src/index.ts"],
+      "@iot-workspace/frontend-utils": ["./frontend/utils/src/index.ts"],
+      "@iot-workspace/backend-utils": ["./backend/utils/src/index.ts"]
+    }
   }
 }
