@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { SupabaseService } from '@iot-workspace/core';
 import { IAccessResponseDto, IValidateAccessDto } from '@iot-workspace/interfaces';
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -103,5 +103,25 @@ export class AccessService {
         mensaje: 'Error de Servidor: Modo Offline Activado',
       };
     }
+  }
+
+  public async getAccessLogs(): Promise<any[]> {
+    const client: SupabaseClient = this.supabaseService.getClient();
+    const {
+      data,
+      error,
+    }: { data: Record<string, unknown>[] | null; error: Error | null } =
+      await client
+        .from('registro_accesos')
+        .select('*')
+        .order('fecha_hora', { ascending: false })
+        .limit(50);
+
+    if (error) {
+      this.logger.error('Error al obtener historial:', error.message);
+      throw new InternalServerErrorException('Error al obtener el historial');
+    }
+
+    return data ?? [];
   }
 }
