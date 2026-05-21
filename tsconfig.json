@@ -2,5 +2,42 @@
   "extends": "./tsconfig.base.json",
   "compileOnSave": false,
   "files": [],
-  "references": []
+  "references": [
+    {
+      "path": "./frontend/data-access"
+    },
+    {
+      "path": "./admin-dashboard-e2e"
+    },
+    {
+      "path": "./shared/interfaces"
+    },
+    {
+      "path": "./resident-app-e2e"
+    },
+    {
+      "path": "./admin-dashboard"
+    },
+    {
+      "path": "./api-backend-e2e"
+    },
+    {
+      "path": "./frontend/utils"
+    },
+    {
+      "path": "./backend/utils"
+    },
+    {
+      "path": "./backend/core"
+    },
+    {
+      "path": "./resident-app"
+    },
+    {
+      "path": "./api-backend"
+    },
+    {
+      "path": "./frontend/ui"
+    }
+  ]
 }

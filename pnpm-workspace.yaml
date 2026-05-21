@@ -1,0 +1,7 @@
+packages:
+  - 'admin-dashboard'
+  - 'api-backend'
+  - 'resident-app'
+  - 'backend/**'
+  - 'frontend/**'
+  - 'shared/**'

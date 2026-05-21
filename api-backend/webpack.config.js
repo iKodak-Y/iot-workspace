@@ -9,6 +9,15 @@ module.exports = {
       devtoolModuleFilenameTemplate: '[absolute-resource-path]',
     }),
   },
+  resolve: {
+    alias: {
+      '@iot-workspace/core': join(__dirname, '../backend/core/src/index.ts'),
+      '@iot-workspace/interfaces': join(
+        __dirname,
+        '../shared/interfaces/src/index.ts',
+      ),
+    },
+  },
   plugins: [
     new NxAppWebpackPlugin({
       target: 'node',
