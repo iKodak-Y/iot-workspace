@@ -4,3 +4,5 @@ export * from './lib/access-point.interface';
 export * from './lib/access-log.interface';
 export * from './lib/validate-access.dto';
 export * from './lib/access-response.dto';
+export * from './lib/login.dto';
+export * from './lib/auth-response.dto';
