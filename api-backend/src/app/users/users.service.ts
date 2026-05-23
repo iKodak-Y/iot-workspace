@@ -51,4 +51,20 @@ export class UsersService {
 
     return data;
   }
+
+  async toggleStatus(id: string, estado: boolean) {
+    const client = this.supabaseService.getClient();
+    const { data, error } = await client
+      .from('usuarios')
+      .update({ estado })
+      .eq('id', id)
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      throw new InternalServerErrorException(`Error al actualizar estado del usuario: ${error.message}`);
+    }
+
+    return data;
+  }
 }

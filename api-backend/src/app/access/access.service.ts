@@ -10,6 +10,7 @@ type CredencialUsuario = {
   usuarios: {
     estado: boolean;
     nombre_completo: string;
+    bloque_villa: string;
   } | null;
 };
 
@@ -36,7 +37,7 @@ export class AccessService {
         error: Error | null;
       } = await client
         .from('credenciales')
-        .select('id, activo, usuarios(estado, nombre_completo)')
+        .select('id, activo, usuarios(estado, nombre_completo, bloque_villa)')
         .eq('uid_hex', dto.uidHex)
         .maybeSingle();
 
@@ -66,6 +67,8 @@ export class AccessService {
           motivo: 'Tag Desconocido',
           punto_acceso_id: dto.puntoAccesoId,
           fecha_hora: new Date().toISOString(),
+          nombre_completo: 'Tag Desconocido',
+          bloque_villa: 'N/A',
         });
 
         return {
@@ -76,6 +79,30 @@ export class AccessService {
 
       const usuarioActivo: boolean = Boolean(credencial.usuarios?.estado);
       const credencialActiva: boolean = Boolean(credencial.activo);
+
+      if (credencial.usuarios?.estado === false) {
+        await client.from('registro_accesos').insert({
+          uid_leido: dto.uidHex,
+          autorizado: false,
+          motivo: 'Usuario Suspendido',
+          punto_acceso_id: dto.puntoAccesoId,
+        });
+
+        this.accessGateway.server.emit('nuevo-acceso', {
+          uid_leido: dto.uidHex,
+          autorizado: false,
+          motivo: 'Usuario Suspendido',
+          punto_acceso_id: dto.puntoAccesoId,
+          fecha_hora: new Date().toISOString(),
+          nombre_completo: credencial.usuarios?.nombre_completo || 'Tag Desconocido',
+          bloque_villa: credencial.usuarios?.bloque_villa || 'N/A',
+        });
+
+        return {
+          autorizado: false,
+          mensaje: 'Acceso Denegado: Usuario Suspendido',
+        };
+      }
 
       if (!credencialActiva || !usuarioActivo) {
         await client.from('registro_accesos').insert({
@@ -91,6 +118,8 @@ export class AccessService {
           motivo: 'Usuario o Tarjeta Inactiva',
           punto_acceso_id: dto.puntoAccesoId,
           fecha_hora: new Date().toISOString(),
+          nombre_completo: credencial.usuarios?.nombre_completo || 'Tag Desconocido',
+          bloque_villa: credencial.usuarios?.bloque_villa || 'N/A',
         });
 
         return {
@@ -112,6 +141,8 @@ export class AccessService {
         motivo: 'Acceso Exitoso',
         punto_acceso_id: dto.puntoAccesoId,
         fecha_hora: new Date().toISOString(),
+        nombre_completo: credencial.usuarios?.nombre_completo || 'Tag Desconocido',
+        bloque_villa: credencial.usuarios?.bloque_villa || 'N/A',
       });
 
       return {
@@ -150,6 +181,29 @@ export class AccessService {
       throw new InternalServerErrorException('Error al obtener el historial');
     }
 
-    return data ?? [];
+    const { data: creds } = await client
+      .from('credenciales')
+      .select('uid_hex, usuarios(nombre_completo, bloque_villa)');
+
+    const credsMap = new Map<string, { nombre_completo: string; bloque_villa: string }>();
+    if (creds) {
+      creds.forEach((c: any) => {
+        credsMap.set(c.uid_hex, {
+          nombre_completo: c.usuarios?.nombre_completo || 'Tag Desconocido',
+          bloque_villa: c.usuarios?.bloque_villa || 'N/A',
+        });
+      });
+    }
+
+    const enrichedLogs = (data ?? []).map((log: any) => {
+      const user = credsMap.get(log.uid_leido);
+      return {
+        ...log,
+        nombre_completo: user?.nombre_completo || 'Tag Desconocido',
+        bloque_villa: user?.bloque_villa || 'N/A',
+      };
+    });
+
+    return enrichedLogs;
   }
 }
