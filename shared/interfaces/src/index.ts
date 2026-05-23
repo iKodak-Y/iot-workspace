@@ -6,3 +6,4 @@ export * from './lib/validate-access.dto';
 export * from './lib/access-response.dto';
 export * from './lib/login.dto';
 export * from './lib/auth-response.dto';
+export * from './lib/create-user.dto';
