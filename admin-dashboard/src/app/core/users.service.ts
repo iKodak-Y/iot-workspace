@@ -29,4 +29,8 @@ export class UsersService {
   assignCredential(usuarioId: string, uidHex: string, tipo: string) {
     return this.http.post<any>(this.credentialsUrl, { usuarioId, uidHex, tipo }, this.getHeaders());
   }
+
+  toggleUserStatus(id: string, estado: boolean) {
+    return this.http.patch<any>(`${this.apiUrl}/${id}/status`, { estado }, this.getHeaders());
+  }
 }

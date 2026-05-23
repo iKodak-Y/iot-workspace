@@ -50,13 +50,25 @@ import { UsersService } from '../../core/users.service';
               </div>
             </div>
 
-            <div class="flex-1">
-              <label for="bloqueVilla" class="block text-sm font-medium text-slate-400 mb-1">Bloque / Villa</label>
-              <input type="text" id="bloqueVilla" formControlName="bloqueVilla"
-                     class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors placeholder:text-slate-600 outline-none"
-                     placeholder="Ej. Villa 12, Manzana B">
-              <div *ngIf="userForm.get('bloqueVilla')?.invalid && userForm.get('bloqueVilla')?.touched" class="mt-1 text-xs text-rose-400">
-                El bloque o villa es obligatorio.
+            <div class="flex-1 flex gap-4">
+              <div class="flex-1">
+                <label for="bloque" class="block text-sm font-medium text-slate-400 mb-1">Bloque</label>
+                <input type="text" id="bloque" formControlName="bloque"
+                       class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors placeholder:text-slate-600 outline-none"
+                       placeholder="Ej. 1">
+                <div *ngIf="userForm.get('bloque')?.invalid && userForm.get('bloque')?.touched" class="mt-1 text-xs text-rose-400">
+                  El bloque es obligatorio.
+                </div>
+              </div>
+
+              <div class="flex-1">
+                <label for="villa" class="block text-sm font-medium text-slate-400 mb-1">Villa</label>
+                <input type="text" id="villa" formControlName="villa"
+                       class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors placeholder:text-slate-600 outline-none"
+                       placeholder="Ej. 14">
+                <div *ngIf="userForm.get('villa')?.invalid && userForm.get('villa')?.touched" class="mt-1 text-xs text-rose-400">
+                  La villa es obligatoria.
+                </div>
               </div>
             </div>
 
@@ -83,6 +95,7 @@ import { UsersService } from '../../core/users.service';
                   <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Nombre</th>
                   <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Bloque / Villa</th>
                   <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Rol</th>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Estado</th>
                   <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Fecha de Registro</th>
                   <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Acciones</th>
                 </tr>
@@ -100,10 +113,24 @@ import { UsersService } from '../../core/users.service';
                       {{ user.rol }}
                     </span>
                   </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <span *ngIf="user.estado" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      Activo
+                    </span>
+                    <span *ngIf="!user.estado" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                      Suspendido
+                    </span>
+                  </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
                     {{ user.created_at | date:'dd/MM/yyyy' }}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button *ngIf="user.estado" (click)="onToggleStatus(user)" class="text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 px-3 py-1.5 rounded-lg border border-rose-500/20 transition-colors mr-2">
+                      Suspender
+                    </button>
+                    <button *ngIf="!user.estado" (click)="onToggleStatus(user)" class="text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-lg border border-emerald-500/20 transition-colors mr-2">
+                      Activar
+                    </button>
                     <button (click)="openCredentialModal(user)" class="text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 px-3 py-1.5 rounded-lg border border-indigo-500/20 transition-colors">
                       Asignar Tarjeta
                     </button>
@@ -201,7 +228,8 @@ export class UsersComponent implements OnInit {
 
   readonly userForm = this.fb.group({
     nombreCompleto: ['', Validators.required],
-    bloqueVilla: ['', Validators.required],
+    bloque: ['', Validators.required],
+    villa: ['', Validators.required],
   });
 
   readonly credentialForm = this.fb.group({
@@ -236,7 +264,7 @@ export class UsersComponent implements OnInit {
 
       const payload = {
         nombreCompleto: this.userForm.value.nombreCompleto!,
-        bloqueVilla: this.userForm.value.bloqueVilla!,
+        bloqueVilla: `Bloque ${this.userForm.value.bloque} - Villa ${this.userForm.value.villa}`,
         rol: 'residente', // Hardcoded as per instructions
       };
 
@@ -255,6 +283,19 @@ export class UsersComponent implements OnInit {
     } else {
       this.userForm.markAllAsTouched();
     }
+  }
+
+  onToggleStatus(user: any): void {
+    const newStatus = !user.estado;
+    this.usersService.toggleUserStatus(user.id, newStatus).subscribe({
+      next: () => {
+        this.fetchUsers();
+      },
+      error: (err) => {
+        console.error('Error toggling user status:', err);
+        this.errorMessage.set('Error al cambiar el estado del usuario.');
+      }
+    });
   }
 
   openCredentialModal(user: any): void {

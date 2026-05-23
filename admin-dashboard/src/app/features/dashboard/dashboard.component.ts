@@ -10,6 +10,8 @@ interface AccessLog {
   motivo: string;
   fecha_hora: string;
   punto_acceso_id?: number;
+  nombre_completo?: string;
+  bloque_villa?: string;
 }
 
 @Component({
@@ -42,9 +44,7 @@ interface AccessLog {
               [disabled]="isLoading()"
               class="inline-flex items-center px-4 py-2 border border-slate-800 rounded-xl shadow-sm text-sm font-medium text-slate-200 bg-slate-900 hover:bg-slate-805 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 transition-all cursor-pointer"
             >
-              <svg class="h-4 w-4 mr-2" [class.animate-spin]="isLoading()" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.2" />
-              </svg>
+              <svg class="h-4 w-4 mr-2" [class.animate-spin]="isLoading()" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.2" /></svg>
               <span>Actualizar</span>
             </button>
           </div>
@@ -64,17 +64,20 @@ interface AccessLog {
             <table class="min-w-full divide-y divide-slate-800/60">
               <thead class="bg-slate-950/40">
                 <tr>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">UID Leído</th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Autorizado</th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Motivo</th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Fecha</th>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Residente / Usuario</th>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Ubicación</th>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Estado</th>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Motivo / UID</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-800/40 bg-slate-900/10">
                 <!-- Log List Rows -->
                 <tr *ngFor="let log of logs()" class="hover:bg-slate-800/20 transition-colors">
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-indigo-300">
-                    {{ log.uid_leido }}
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" [ngClass]="{'text-slate-200': log.nombre_completo !== 'Tag Desconocido', 'text-slate-500 italic': log.nombre_completo === 'Tag Desconocido'}">
+                    {{ log.nombre_completo }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
+                    {{ log.bloque_villa }}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm">
                     <span
@@ -92,11 +95,12 @@ interface AccessLog {
                       No
                     </span>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
-                    {{ log.motivo }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
-                    {{ log.fecha_hora | date:'dd/MM/yyyy HH:mm:ss' }}
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-slate-300">{{ log.motivo }}</div>
+                    <div class="text-xs text-slate-500 font-mono mt-0.5 flex items-center gap-4">
+                      <span>{{ log.uid_leido }}</span>
+                      <span class="text-[10px] text-slate-500">{{ log.fecha_hora | date:'dd/MM/yy HH:mm' }}</span>
+                    </div>
                   </td>
                 </tr>
 
@@ -145,6 +149,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.fetchLogs();
     this.socket = io('http://localhost:3000');
     this.socket.on('nuevo-acceso', (newLog: AccessLog) => {
+      newLog.nombre_completo = newLog.nombre_completo || 'Tag Desconocido';
+      newLog.bloque_villa = newLog.bloque_villa || 'N/A';
       this.logs.update(currentLogs => [newLog, ...currentLogs]);
     });
   }
