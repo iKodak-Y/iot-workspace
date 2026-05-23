@@ -1,7 +1,8 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { io, Socket } from 'socket.io-client';
 
 interface AccessLog {
   id: number;
@@ -154,9 +155,10 @@ interface AccessLog {
     </div>
   `,
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
+  private socket!: Socket;
 
   readonly logs = signal<AccessLog[]>([]);
   readonly isLoading = signal(false);
@@ -164,6 +166,16 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.fetchLogs();
+    this.socket = io('http://localhost:3000');
+    this.socket.on('nuevo-acceso', (newLog: AccessLog) => {
+      this.logs.update(currentLogs => [newLog, ...currentLogs]);
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.socket) {
+      this.socket.disconnect();
+    }
   }
 
   /**

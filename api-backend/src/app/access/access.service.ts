@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common
 import { SupabaseService } from '@iot-workspace/core';
 import { IAccessResponseDto, IValidateAccessDto } from '@iot-workspace/interfaces';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { AccessGateway } from './access.gateway';
 
 type CredencialUsuario = {
   id: number;
@@ -16,7 +17,10 @@ type CredencialUsuario = {
 export class AccessService {
   private readonly logger: Logger = new Logger(AccessService.name);
 
-  public constructor(private readonly supabaseService: SupabaseService) {}
+  public constructor(
+    private readonly supabaseService: SupabaseService,
+    private readonly accessGateway: AccessGateway,
+  ) {}
 
   public async validateAccess(
     dto: IValidateAccessDto,
@@ -56,6 +60,14 @@ export class AccessService {
           punto_acceso_id: dto.puntoAccesoId,
         });
 
+        this.accessGateway.server.emit('nuevo-acceso', {
+          uid_leido: dto.uidHex,
+          autorizado: false,
+          motivo: 'Tag Desconocido',
+          punto_acceso_id: dto.puntoAccesoId,
+          fecha_hora: new Date().toISOString(),
+        });
+
         return {
           autorizado: false,
           mensaje: 'Acceso Denegado: Tag Desconocido',
@@ -73,6 +85,14 @@ export class AccessService {
           punto_acceso_id: dto.puntoAccesoId,
         });
 
+        this.accessGateway.server.emit('nuevo-acceso', {
+          uid_leido: dto.uidHex,
+          autorizado: false,
+          motivo: 'Usuario o Tarjeta Inactiva',
+          punto_acceso_id: dto.puntoAccesoId,
+          fecha_hora: new Date().toISOString(),
+        });
+
         return {
           autorizado: false,
           mensaje: 'Acceso Denegado: Llave Inactiva',
@@ -84,6 +104,14 @@ export class AccessService {
         autorizado: true,
         motivo: 'Acceso Exitoso',
         punto_acceso_id: dto.puntoAccesoId,
+      });
+
+      this.accessGateway.server.emit('nuevo-acceso', {
+        uid_leido: dto.uidHex,
+        autorizado: true,
+        motivo: 'Acceso Exitoso',
+        punto_acceso_id: dto.puntoAccesoId,
+        fecha_hora: new Date().toISOString(),
       });
 
       return {
