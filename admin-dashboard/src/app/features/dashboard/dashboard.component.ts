@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 import { io, Socket } from 'socket.io-client';
 
 interface AccessLog {
@@ -23,28 +22,7 @@ interface AccessLog {
       <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
       <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-violet-500/5 rounded-full blur-3xl pointer-events-none"></div>
 
-      <!-- Navigation Header -->
-      <header class="border-b border-slate-900 bg-slate-900/35 backdrop-blur-md sticky top-0 z-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="h-9 w-9 rounded-lg bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center shadow-md shadow-indigo-500/20">
-              <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-              </svg>
-            </div>
-            <span class="font-bold text-lg tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">Sistema IoT</span>
-          </div>
-          <button
-            (click)="logout()"
-            class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-slate-300 hover:text-white transition-all cursor-pointer"
-          >
-            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            <span>Cerrar Sesión</span>
-          </button>
-        </div>
-      </header>
+
 
       <!-- Main Content -->
       <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
@@ -157,7 +135,6 @@ interface AccessLog {
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   private readonly http = inject(HttpClient);
-  private readonly router = inject(Router);
   private socket!: Socket;
 
   readonly logs = signal<AccessLog[]>([]);
@@ -198,11 +175,4 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Limpia el token y redirige al inicio de sesión.
-   */
-  logout(): void {
-    localStorage.removeItem('iot_token');
-    this.router.navigate(['/login']);
-  }
 }
