@@ -1,5 +1,27 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Core CSS requerido por Ionic */
+@import "@ionic/angular/css/core.css";
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
 
-/* You can add global styles to this file, and also import other style files */
+/* Utilidades opcionales de estructura */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+/* Forzar Tema Oscuro por defecto para la App */
+:root {
+  --ion-background-color: #020617; /* slate-950 */
+  --ion-text-color: #f8fafc; /* slate-50 */
+  --ion-color-primary: #4f46e5; /* indigo-600 */
+  
+  --ion-card-background: #0f172a; /* slate-900 */
+  --ion-item-background: #0f172a;
+}
+
+body {
+  background: var(--ion-background-color);
+  color: var(--ion-text-color);
+  font-family: 'Inter', sans-serif;
+}
