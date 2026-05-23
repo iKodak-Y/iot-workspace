@@ -84,6 +84,7 @@ import { UsersService } from '../../core/users.service';
                   <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Bloque / Villa</th>
                   <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Rol</th>
                   <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Fecha de Registro</th>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-800/40 bg-slate-900/10">
@@ -101,6 +102,11 @@ import { UsersService } from '../../core/users.service';
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
                     {{ user.created_at | date:'dd/MM/yyyy' }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button (click)="openCredentialModal(user)" class="text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 px-3 py-1.5 rounded-lg border border-indigo-500/20 transition-colors">
+                      Asignar Tarjeta
+                    </button>
                   </td>
                 </tr>
 
@@ -133,6 +139,50 @@ import { UsersService } from '../../core/users.service';
           </div>
         </div>
       </main>
+
+      <!-- Modal Overlay -->
+      <div *ngIf="isModalOpen()" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl relative">
+          <h3 class="text-lg font-medium text-white mb-4">
+            Asignar Tarjeta a {{ selectedUser()?.nombre_completo }}
+          </h3>
+          <form [formGroup]="credentialForm" (ngSubmit)="onAssignCredential()" class="space-y-4">
+            <div>
+              <label for="uidHex" class="block text-sm font-medium text-slate-400 mb-1">UID (Hexadecimal)</label>
+              <input type="text" id="uidHex" formControlName="uidHex" autofocus
+                     class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-colors"
+                     placeholder="Escanee la tarjeta o digite el UID">
+              <div *ngIf="credentialForm.get('uidHex')?.invalid && credentialForm.get('uidHex')?.touched" class="mt-1 text-xs text-rose-400">
+                El UID es obligatorio.
+              </div>
+            </div>
+            
+            <div>
+              <label for="tipo" class="block text-sm font-medium text-slate-400 mb-1">Tipo de Credencial</label>
+              <select id="tipo" formControlName="tipo"
+                      class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-colors">
+                <option value="tag_fisico">Tag Físico (RFID/NFC)</option>
+                <option value="smartphone_nfc">Smartphone NFC</option>
+              </select>
+            </div>
+
+            <div class="mt-6 flex justify-end gap-3">
+              <button type="button" (click)="closeModal()" class="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors cursor-pointer">
+                Cancelar
+              </button>
+              <button type="submit" [disabled]="credentialForm.invalid || isAssigning()"
+                      class="inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-colors cursor-pointer disabled:cursor-not-allowed">
+                <svg *ngIf="isAssigning()" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span *ngIf="!isAssigning()">Vincular Credencial</span>
+                <span *ngIf="isAssigning()">Asignando...</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   `
 })
@@ -145,9 +195,18 @@ export class UsersComponent implements OnInit {
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
 
+  readonly selectedUser = signal<any>(null);
+  readonly isModalOpen = signal(false);
+  readonly isAssigning = signal(false);
+
   readonly userForm = this.fb.group({
     nombreCompleto: ['', Validators.required],
     bloqueVilla: ['', Validators.required],
+  });
+
+  readonly credentialForm = this.fb.group({
+    uidHex: ['', Validators.required],
+    tipo: ['tag_fisico', Validators.required]
   });
 
   ngOnInit(): void {
@@ -195,6 +254,43 @@ export class UsersComponent implements OnInit {
       });
     } else {
       this.userForm.markAllAsTouched();
+    }
+  }
+
+  openCredentialModal(user: any): void {
+    this.selectedUser.set(user);
+    this.credentialForm.reset({ tipo: 'tag_fisico' });
+    this.isModalOpen.set(true);
+  }
+
+  closeModal(): void {
+    this.isModalOpen.set(false);
+    this.selectedUser.set(null);
+  }
+
+  onAssignCredential(): void {
+    if (this.credentialForm.valid && this.selectedUser()) {
+      this.isAssigning.set(true);
+      this.errorMessage.set(null);
+
+      const { uidHex, tipo } = this.credentialForm.value;
+      const usuarioId = this.selectedUser().id;
+
+      this.usersService.assignCredential(usuarioId, uidHex!, tipo!).subscribe({
+        next: () => {
+          console.log('Credencial asignada con éxito');
+          this.closeModal();
+          this.isAssigning.set(false);
+        },
+        error: (err) => {
+          console.error('Error assigning credential:', err);
+          this.errorMessage.set(err.error?.message || 'Error al asignar la credencial.');
+          this.closeModal();
+          this.isAssigning.set(false);
+        }
+      });
+    } else {
+      this.credentialForm.markAllAsTouched();
     }
   }
 }

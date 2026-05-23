@@ -7,6 +7,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 export class UsersService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = 'http://localhost:3000/api/users';
+  private readonly credentialsUrl = 'http://localhost:3000/api/credentials';
 
   private getHeaders() {
     const token = localStorage.getItem('iot_token');
@@ -23,5 +24,9 @@ export class UsersService {
 
   createUser(data: { nombreCompleto: string; bloqueVilla: string; rol: string }) {
     return this.http.post<any>(this.apiUrl, data, this.getHeaders());
+  }
+
+  assignCredential(usuarioId: string, uidHex: string, tipo: string) {
+    return this.http.post<any>(this.credentialsUrl, { usuarioId, uidHex, tipo }, this.getHeaders());
   }
 }
