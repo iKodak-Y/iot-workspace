@@ -18,4 +18,9 @@ export const appRoutes: Route[] = [
         (m) => m.DashboardComponent
       ),
   },
+  {
+    path: 'users',
+    loadComponent: () =>
+      import('./features/users/users.component').then((m) => m.UsersComponent),
+  },
 ];
