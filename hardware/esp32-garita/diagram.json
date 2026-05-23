@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "author": "Isaac Kodaka",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-esp32-devkit-v1", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    { "type": "board-mfrc522", "id": "rfid", "top": 50, "left": 250, "attrs": {} },
+    { "type": "wokwi-servo", "id": "servo", "top": -120, "left": 180, "attrs": {} },
+    { "type": "wokwi-relay-module", "id": "relay", "top": -120, "left": -150, "attrs": {} },
+    { "type": "wokwi-buzzer", "id": "buzzer", "top": -60, "left": -50, "attrs": { "volume": "0.1" } },
+    { "type": "wokwi-led", "id": "led_verde", "top": -80, "left": 50, "attrs": { "color": "green" } },
+    { "type": "wokwi-led", "id": "led_rojo", "top": -80, "left": 90, "attrs": { "color": "red" } },
+    { "type": "wokwi-resistor", "id": "r1", "top": -30, "left": 50, "attrs": { "value": "330" } },
+    { "type": "wokwi-resistor", "id": "r2", "top": -30, "left": 90, "attrs": { "value": "330" } }
+  ],
+  "connections": [
+    [ "esp:TX0", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX0", "$serialMonitor:TX", "", [] ],
+    [ "rfid:3.3V", "esp:3V3", "red", [] ],
+    [ "rfid:GND", "esp:GND.1", "black", [] ],
+    [ "rfid:SDA", "esp:D5", "green", [] ],
+    [ "rfid:SCK", "esp:D18", "yellow", [] ],
+    [ "rfid:MOSI", "esp:D23", "orange", [] ],
+    [ "rfid:MISO", "esp:D19", "blue", [] ],
+    [ "rfid:RST", "esp:D22", "purple", [] ],
+    [ "servo:V+", "esp:VIN", "red", [] ],
+    [ "servo:GND", "esp:GND.2", "black", [] ],
+    [ "servo:PWM", "esp:D26", "orange", [] ],
+    [ "relay:VCC", "esp:VIN", "red", [] ],
+    [ "relay:GND", "esp:GND.3", "black", [] ],
+    [ "relay:IN", "esp:D25", "green", [] ],
+    [ "buzzer:1", "esp:GND.1", "black", [] ],
+    [ "buzzer:2", "esp:D27", "purple", [] ],
+    [ "esp:D32", "led_verde:A", "green", [ "v0" ] ],
+    [ "esp:D33", "led_rojo:A", "red", [ "v0" ] ],
+    [ "led_verde:C", "r1:2", "black", [ "v0" ] ],
+    [ "led_rojo:C", "r2:2", "black", [ "v0" ] ],
+    [ "r1:1", "esp:GND.2", "black", [ "v0" ] ],
+    [ "r2:1", "esp:GND.2", "black", [ "v0" ] ]
+  ],
+  "dependencies": {}
+}
