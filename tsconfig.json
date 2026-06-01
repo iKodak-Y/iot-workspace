@@ -7,19 +7,10 @@
       "path": "./frontend/data-access"
     },
     {
-      "path": "./admin-dashboard-e2e"
-    },
-    {
       "path": "./shared/interfaces"
     },
     {
-      "path": "./resident-app-e2e"
-    },
-    {
       "path": "./admin-dashboard"
-    },
-    {
-      "path": "./api-backend-e2e"
     },
     {
       "path": "./frontend/utils"
