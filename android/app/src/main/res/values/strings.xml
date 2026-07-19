@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">App Residentes</string>
+    <string name="title_activity_main">App Residentes</string>
+    <string name="package_name">com.iot.residentapp</string>
+    <string name="custom_url_scheme">com.iot.residentapp</string>
+</resources>

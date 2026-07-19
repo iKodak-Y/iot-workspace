@@ -9,6 +9,20 @@ export class CredentialsService {
   async assign(dto: CreateCredentialDto) {
     const client = this.supabaseService.getClient();
 
+    const credentialPayload = dto.tipo === 'smartphone_nfc'
+      ? {
+          usuario_id: dto.usuarioId,
+          uid_hex: dto.uidHex,
+          device_token: dto.uidHex,
+          device_token_updated_at: new Date().toISOString(),
+          tipo: dto.tipo,
+        }
+      : {
+          usuario_id: dto.usuarioId,
+          uid_hex: dto.uidHex,
+          tipo: dto.tipo,
+        };
+
     // Check if the credential already exists
     const { data: existing } = await client
       .from('credenciales')
@@ -23,11 +37,7 @@ export class CredentialsService {
     // Insert the new credential mapped to snake_case
     const { data, error } = await client
       .from('credenciales')
-      .insert({
-        usuario_id: dto.usuarioId,
-        uid_hex: dto.uidHex,
-        tipo: dto.tipo,
-      })
+      .insert(credentialPayload)
       .select()
       .maybeSingle();
 
@@ -36,5 +46,35 @@ export class CredentialsService {
     }
 
     return data;
+  }
+
+  async getByUserId(userId: string) {
+    const client = this.supabaseService.getClient();
+    const { data, error } = await client
+      .from('credenciales')
+      .select('*')
+      .eq('usuario_id', userId);
+
+    if (error) {
+      console.error('Supabase getByUserId error:', error);
+      throw new InternalServerErrorException(`Error al obtener credenciales: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  async remove(id: string) {
+    const client = this.supabaseService.getClient();
+    const { data, error } = await client
+      .from('credenciales')
+      .delete()
+      .eq('id', id)
+      .select();
+
+    if (error) {
+      throw new InternalServerErrorException(`Error al eliminar credencial: ${error.message}`);
+    }
+
+    return { success: true, deleted: data };
   }
 }

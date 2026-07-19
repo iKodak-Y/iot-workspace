@@ -35,6 +35,47 @@ import { UsersService } from '../../core/users.service';
           <span>{{ errorMessage() }}</span>
         </div>
 
+        <div *ngIf="activationInfo() as codes" class="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-200">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p class="font-semibold">Códigos generados</p>
+              <p class="text-sm text-emerald-100/80">El temporal activa la cuenta por primera vez. El de recuperación sirve si cambia de teléfono o cierra sesión.</p>
+            </div>
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-4 py-2 rounded-xl bg-slate-950/80 border border-emerald-500/20 font-mono text-lg tracking-[0.35em]">{{ codes.activationCode }}</span>
+                <button type="button" (click)="copyCode(codes.activationCode)" class="px-3 py-2 rounded-xl bg-slate-950/60 border border-emerald-500/20 text-sm text-emerald-100">Copiar activación</button>
+              </div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-4 py-2 rounded-xl bg-slate-950/80 border border-emerald-500/20 font-mono text-lg tracking-[0.35em]">{{ codes.recoveryCode }}</span>
+                <button type="button" (click)="copyCode(codes.recoveryCode)" class="px-3 py-2 rounded-xl bg-slate-950/60 border border-emerald-500/20 text-sm text-emerald-100">Copiar recuperación</button>
+              </div>
+              <button type="button" (click)="activationInfo.set(null)" class="px-3 py-2 rounded-xl bg-slate-950/60 border border-emerald-500/20 text-sm text-emerald-100 self-start">Cerrar</button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="recoveryInfo() as recovery" class="mb-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-amber-100">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p class="font-semibold">Código de recuperación</p>
+              <p class="text-sm text-amber-100/80">Solo muéstralo cuando el residente lo pida. Si cambió de teléfono o sospechas exposición, reemítelo desde aquí.</p>
+              <p class="mt-1 text-xs text-amber-100/70">{{ recovery.user.nombreCompleto }}</p>
+            </div>
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-4 py-2 rounded-xl bg-slate-950/80 border border-amber-500/20 font-mono text-lg tracking-[0.35em]">{{ recovery.recoveryCode }}</span>
+                <button type="button" (click)="copyCode(recovery.recoveryCode)" class="px-3 py-2 rounded-xl bg-slate-950/60 border border-amber-500/20 text-sm text-amber-100">Copiar</button>
+                <button type="button" (click)="refreshRecoveryCode(recovery.user.id)" [disabled]="isRefreshingRecovery()" class="px-3 py-2 rounded-xl bg-slate-950/60 border border-amber-500/20 text-sm text-amber-100 disabled:opacity-50">
+                  <span *ngIf="!isRefreshingRecovery()">Reemitir</span>
+                  <span *ngIf="isRefreshingRecovery()">Reemitiendo...</span>
+                </button>
+              </div>
+              <button type="button" (click)="recoveryInfo.set(null)" class="px-3 py-2 rounded-xl bg-slate-950/60 border border-amber-500/20 text-sm text-amber-100 self-start">Cerrar</button>
+            </div>
+          </div>
+        </div>
+
         <!-- Top Section: Form -->
         <div class="bg-slate-900/40 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-6 mb-8 shadow-2xl">
           <h2 class="text-lg font-medium text-white mb-4">Registrar Nuevo Residente</h2>
@@ -96,6 +137,7 @@ import { UsersService } from '../../core/users.service';
                   <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Bloque / Villa</th>
                   <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Rol</th>
                   <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Estado</th>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Teléfono</th>
                   <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Fecha de Registro</th>
                   <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Acciones</th>
                 </tr>
@@ -121,6 +163,17 @@ import { UsersService } from '../../core/users.service';
                       Suspendido
                     </span>
                   </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <span *ngIf="user.has_smartphone_credential && user.smartphone_credential_active" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-500/10 text-sky-300 border border-sky-500/20">
+                      Vinculado
+                    </span>
+                    <span *ngIf="user.has_smartphone_credential && !user.smartphone_credential_active" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                      Inactivo
+                    </span>
+                    <span *ngIf="!user.has_smartphone_credential" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-500/10 text-slate-300 border border-slate-500/20">
+                      Solo tarjeta física
+                    </span>
+                  </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
                     {{ user.created_at | date:'dd/MM/yyyy' }}
                   </td>
@@ -134,12 +187,18 @@ import { UsersService } from '../../core/users.service';
                     <button (click)="openCredentialModal(user)" class="text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 px-3 py-1.5 rounded-lg border border-indigo-500/20 transition-colors">
                       Asignar Tarjeta
                     </button>
+                    <button (click)="openViewCredentialsModal(user)" class="text-sky-400 hover:text-sky-300 bg-sky-500/10 hover:bg-sky-500/20 px-3 py-1.5 rounded-lg border border-sky-500/20 transition-colors ml-2">
+                      Ver Tarjetas
+                    </button>
+                    <button (click)="openRecoveryModal(user)" class="text-amber-300 hover:text-amber-200 bg-amber-500/10 hover:bg-amber-500/20 px-3 py-1.5 rounded-lg border border-amber-500/20 transition-colors ml-2">
+                      Ver recuperación
+                    </button>
                   </td>
                 </tr>
 
                 <!-- Loading State -->
                 <tr *ngIf="isLoading()">
-                  <td colspan="4" class="px-6 py-12 text-center">
+                  <td colspan="7" class="px-6 py-12 text-center">
                     <div class="flex items-center justify-center gap-3 text-slate-400 text-sm">
                       <svg class="animate-spin h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -152,7 +211,7 @@ import { UsersService } from '../../core/users.service';
                 
                 <!-- Empty State -->
                 <tr *ngIf="!isLoading() && users().length === 0">
-                  <td colspan="4" class="px-6 py-12 text-center">
+                  <td colspan="7" class="px-6 py-12 text-center">
                     <div class="flex flex-col items-center justify-center">
                       <svg class="h-10 w-10 text-slate-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -210,6 +269,53 @@ import { UsersService } from '../../core/users.service';
           </form>
         </div>
       </div>
+
+      <!-- View Credentials Modal -->
+      <div *ngIf="isViewCredentialsModalOpen()" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-2xl shadow-2xl relative max-h-[80vh] overflow-y-auto">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="text-lg font-medium text-white">
+              Tarjetas de {{ selectedUser()?.nombre_completo }}
+            </h3>
+            <button (click)="closeViewCredentialsModal()" class="text-slate-400 hover:text-white cursor-pointer">
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          
+          <div *ngIf="isLoadingCredentials()" class="flex justify-center py-8">
+            <svg class="animate-spin h-8 w-8 text-indigo-400" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+
+          <div *ngIf="!isLoadingCredentials() && userCredentials().length === 0" class="text-center py-8 text-slate-400">
+            No hay tarjetas registradas para este usuario.
+          </div>
+
+          <div *ngIf="!isLoadingCredentials() && userCredentials().length > 0" class="space-y-4">
+            <div *ngFor="let cred of userCredentials()" class="flex items-center justify-between bg-slate-950/50 p-4 rounded-xl border border-slate-800">
+              <div>
+                <p class="font-mono text-lg text-slate-200">{{ cred.uid_hex }}</p>
+                <div class="flex items-center gap-3 mt-1">
+                  <span class="text-xs text-slate-400 capitalize">{{ cred.tipo.replace('_', ' ') }}</span>
+                  <span class="text-xs text-slate-500">{{ cred.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+              </div>
+              <button (click)="deleteCredential(cred.id)" [disabled]="isDeletingCredential() === cred.id"
+                      class="text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 px-3 py-2 rounded-lg border border-rose-500/20 transition-colors disabled:opacity-50 flex items-center gap-2 cursor-pointer">
+                <svg *ngIf="isDeletingCredential() === cred.id" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Desvincular</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   `
 })
@@ -225,6 +331,18 @@ export class UsersComponent implements OnInit {
   readonly selectedUser = signal<any>(null);
   readonly isModalOpen = signal(false);
   readonly isAssigning = signal(false);
+  readonly activationInfo = signal<{ activationCode: string; recoveryCode: string } | null>(null);
+  readonly recoveryInfo = signal<{ user: { id: string; nombreCompleto: string }; recoveryCode: string } | null>(null);
+  readonly isRefreshingRecovery = signal(false);
+
+  readonly isViewCredentialsModalOpen = signal(false);
+  readonly userCredentials = signal<any[]>([]);
+  readonly isLoadingCredentials = signal(false);
+  readonly isDeletingCredential = signal<string | null>(null);
+
+  protected copyCode(code: string): void {
+    void navigator.clipboard.writeText(code);
+  }
 
   readonly userForm = this.fb.group({
     nombreCompleto: ['', Validators.required],
@@ -269,8 +387,12 @@ export class UsersComponent implements OnInit {
       };
 
       this.usersService.createUser(payload).subscribe({
-        next: () => {
+        next: (response) => {
           this.userForm.reset();
+          this.activationInfo.set({
+            activationCode: response.activationCode,
+            recoveryCode: response.recoveryCode,
+          });
           this.fetchUsers(); // Refresh the table
           this.isSubmitting.set(false);
         },
@@ -304,6 +426,36 @@ export class UsersComponent implements OnInit {
     this.isModalOpen.set(true);
   }
 
+  openRecoveryModal(user: any): void {
+    this.errorMessage.set(null);
+    this.usersService.getRecoveryCode(user.id).subscribe({
+      next: (response) => {
+        this.recoveryInfo.set(response);
+      },
+      error: (err) => {
+        console.error('Error fetching recovery code:', err);
+        this.errorMessage.set(err.error?.message || 'Error al obtener el código de recuperación.');
+      }
+    });
+  }
+
+  refreshRecoveryCode(userId: string): void {
+    this.isRefreshingRecovery.set(true);
+    this.errorMessage.set(null);
+
+    this.usersService.rotateRecoveryCode(userId).subscribe({
+      next: (response) => {
+        this.recoveryInfo.set(response);
+        this.isRefreshingRecovery.set(false);
+      },
+      error: (err) => {
+        console.error('Error rotating recovery code:', err);
+        this.errorMessage.set(err.error?.message || 'Error al regenerar el código de recuperación.');
+        this.isRefreshingRecovery.set(false);
+      }
+    });
+  }
+
   closeModal(): void {
     this.isModalOpen.set(false);
     this.selectedUser.set(null);
@@ -332,6 +484,51 @@ export class UsersComponent implements OnInit {
       });
     } else {
       this.credentialForm.markAllAsTouched();
+    }
+  }
+
+  openViewCredentialsModal(user: any): void {
+    this.selectedUser.set(user);
+    this.isViewCredentialsModalOpen.set(true);
+    this.fetchUserCredentials(user.id);
+  }
+
+  closeViewCredentialsModal(): void {
+    this.isViewCredentialsModalOpen.set(false);
+    this.selectedUser.set(null);
+    this.userCredentials.set([]);
+  }
+
+  fetchUserCredentials(userId: string): void {
+    this.isLoadingCredentials.set(true);
+    this.usersService.getUserCredentials(userId).subscribe({
+      next: (creds) => {
+        this.userCredentials.set(creds);
+        this.isLoadingCredentials.set(false);
+      },
+      error: (err) => {
+        console.error('Error fetching credentials:', err);
+        this.errorMessage.set('Error al cargar tarjetas.');
+        this.isLoadingCredentials.set(false);
+      }
+    });
+  }
+
+  deleteCredential(id: string): void {
+    if (confirm('¿Está seguro de que desea desvincular esta tarjeta?')) {
+      this.isDeletingCredential.set(id);
+      this.usersService.deleteCredential(id).subscribe({
+        next: () => {
+          this.fetchUserCredentials(this.selectedUser().id);
+          this.fetchUsers(); // Refresh main table stats
+          this.isDeletingCredential.set(null);
+        },
+        error: (err) => {
+          console.error('Error deleting credential:', err);
+          this.errorMessage.set('Error al desvincular la tarjeta.');
+          this.isDeletingCredential.set(null);
+        }
+      });
     }
   }
 }

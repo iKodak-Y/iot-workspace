@@ -48,3 +48,5 @@ Thumbs.db
 # env files
 .env
 hardware/esp32-garita/src/secrets.h
+.jks
+.pdf

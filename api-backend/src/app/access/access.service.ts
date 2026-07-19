@@ -4,8 +4,11 @@ import { IAccessResponseDto, IValidateAccessDto } from '@iot-workspace/interface
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessGateway } from './access.gateway';
 
+import { Subject } from 'rxjs';
+
 type CredencialUsuario = {
   id: number;
+  tipo: string;
   activo: boolean;
   usuarios: {
     estado: boolean;
@@ -14,14 +17,68 @@ type CredencialUsuario = {
   } | null;
 };
 
+export interface RemoteOpenEvent {
+  data: {
+    puntoAccesoId: string;
+    timestamp: string;
+  };
+}
+
 @Injectable()
 export class AccessService {
   private readonly logger: Logger = new Logger(AccessService.name);
+  private readonly remoteOpenSubject = new Subject<RemoteOpenEvent>();
 
   public constructor(
     private readonly supabaseService: SupabaseService,
     private readonly accessGateway: AccessGateway,
   ) {}
+
+  public getRemoteOpenStream() {
+    return this.remoteOpenSubject.asObservable();
+  }
+
+  public async triggerRemoteOpen(userId: string, puntoAccesoId: string) {
+    const client = this.supabaseService.getClient();
+
+    const { data: user } = await client
+      .from('usuarios')
+      .select('estado, nombre_completo')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (!user || !user.estado) {
+      return { autorizado: false, mensaje: 'Usuario suspendido o no encontrado' };
+    }
+
+    // Registrar en el historial de accesos
+    await client.from('registro_accesos').insert({
+      uid_leido: 'APERTURA_REMOTA',
+      autorizado: true,
+      motivo: 'Apertura por Botón (App)',
+      punto_acceso_id: puntoAccesoId,
+    });
+
+    this.accessGateway.server.emit('nuevo-acceso', {
+      uid_leido: 'APERTURA_REMOTA',
+      autorizado: true,
+      motivo: 'Apertura por Botón (App)',
+      punto_acceso_id: puntoAccesoId,
+      fecha_hora: new Date().toISOString(),
+      nombre_completo: user.nombre_completo,
+      bloque_villa: 'App Móvil',
+    });
+
+    // Emitir el evento para el ESP32 a través de SSE
+    this.remoteOpenSubject.next({
+      data: {
+        puntoAccesoId,
+        timestamp: new Date().toISOString(),
+      },
+    });
+
+    return { autorizado: true, mensaje: 'Puerta Abierta' };
+  }
 
   public async validateAccess(
     dto: IValidateAccessDto,
@@ -29,17 +86,22 @@ export class AccessService {
     const client: SupabaseClient = this.supabaseService.getClient();
 
     try {
-      const {
-        data: credencial,
-        error: credencialError,
-      }: {
-        data: CredencialUsuario | null;
-        error: Error | null;
-      } = await client
+      const byUid = await client
         .from('credenciales')
-        .select('id, activo, usuarios(estado, nombre_completo, bloque_villa)')
+        .select('id, tipo, activo, usuarios(estado, nombre_completo, bloque_villa)')
         .eq('uid_hex', dto.uidHex)
         .maybeSingle();
+
+      const byDeviceToken = byUid.data
+        ? { data: null as CredencialUsuario | null, error: null as Error | null }
+        : await client
+            .from('credenciales')
+            .select('id, tipo, activo, usuarios(estado, nombre_completo, bloque_villa)')
+            .eq('device_token', dto.uidHex)
+            .maybeSingle();
+
+      const credencial = byUid.data ?? byDeviceToken.data;
+      const credencialError = byUid.error ?? byDeviceToken.error;
 
       if (credencialError) {
         const mensajeError: string =
@@ -79,6 +141,7 @@ export class AccessService {
 
       const usuarioActivo: boolean = Boolean(credencial.usuarios?.estado);
       const credencialActiva: boolean = Boolean(credencial.activo);
+      const credencialEsTelefono: boolean = credencial.tipo === 'smartphone_nfc';
 
       if (credencial.usuarios?.estado === false) {
         await client.from('registro_accesos').insert({
@@ -131,14 +194,14 @@ export class AccessService {
       await client.from('registro_accesos').insert({
         uid_leido: dto.uidHex,
         autorizado: true,
-        motivo: 'Acceso Exitoso',
+        motivo: credencialEsTelefono ? 'Acceso Exitoso: Teléfono NFC' : 'Acceso Exitoso',
         punto_acceso_id: dto.puntoAccesoId,
       });
 
       this.accessGateway.server.emit('nuevo-acceso', {
         uid_leido: dto.uidHex,
         autorizado: true,
-        motivo: 'Acceso Exitoso',
+        motivo: credencialEsTelefono ? 'Acceso Exitoso: Teléfono NFC' : 'Acceso Exitoso',
         punto_acceso_id: dto.puntoAccesoId,
         fecha_hora: new Date().toISOString(),
         nombre_completo: credencial.usuarios?.nombre_completo || 'Tag Desconocido',
@@ -147,7 +210,7 @@ export class AccessService {
 
       return {
         autorizado: true,
-        mensaje: 'Acceso Concedido',
+        mensaje: credencialEsTelefono ? 'Acceso Concedido: Teléfono NFC' : 'Acceso Concedido',
         nombreResidente: credencial.usuarios?.nombre_completo ?? '',
       };
     } catch (error: unknown) {
@@ -183,7 +246,7 @@ export class AccessService {
 
     const { data: creds } = await client
       .from('credenciales')
-      .select('uid_hex, usuarios(nombre_completo, bloque_villa)');
+      .select('uid_hex, device_token, usuarios(nombre_completo, bloque_villa)');
 
     const credsMap = new Map<string, { nombre_completo: string; bloque_villa: string }>();
     if (creds) {
@@ -192,6 +255,13 @@ export class AccessService {
           nombre_completo: c.usuarios?.nombre_completo || 'Tag Desconocido',
           bloque_villa: c.usuarios?.bloque_villa || 'N/A',
         });
+
+        if (c.device_token) {
+          credsMap.set(c.device_token, {
+            nombre_completo: c.usuarios?.nombre_completo || 'Tag Desconocido',
+            bloque_villa: c.usuarios?.bloque_villa || 'N/A',
+          });
+        }
       });
     }
 

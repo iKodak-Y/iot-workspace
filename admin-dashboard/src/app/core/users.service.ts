@@ -22,8 +22,16 @@ export class UsersService {
     return this.http.get<any[]>(this.apiUrl, this.getHeaders());
   }
 
+  getRecoveryCode(userId: string) {
+    return this.http.get<{ user: any; recoveryCode: string }>(`${this.apiUrl}/${userId}/recovery-code`, this.getHeaders());
+  }
+
+  rotateRecoveryCode(userId: string) {
+    return this.http.post<{ user: any; recoveryCode: string }>(`${this.apiUrl}/${userId}/recovery-code/rotate`, {}, this.getHeaders());
+  }
+
   createUser(data: { nombreCompleto: string; bloqueVilla: string; rol: string }) {
-    return this.http.post<any>(this.apiUrl, data, this.getHeaders());
+    return this.http.post<{ user: any; activationCode: string; recoveryCode: string; activationCodeExpiresAt: string }>(this.apiUrl, data, this.getHeaders());
   }
 
   assignCredential(usuarioId: string, uidHex: string, tipo: string) {
@@ -32,5 +40,13 @@ export class UsersService {
 
   toggleUserStatus(id: string, estado: boolean) {
     return this.http.patch<any>(`${this.apiUrl}/${id}/status`, { estado }, this.getHeaders());
+  }
+
+  getUserCredentials(userId: string) {
+    return this.http.get<any[]>(`${this.credentialsUrl}/user/${userId}`, this.getHeaders());
+  }
+
+  deleteCredential(id: string) {
+    return this.http.delete<any>(`${this.credentialsUrl}/${id}`, this.getHeaders());
   }
 }

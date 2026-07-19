@@ -1,5 +1,5 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { IAuthResponseDto, ILoginDto } from '@iot-workspace/interfaces';
+import { IActivationDto, IAuthResponseDto, ILoginDto, IRecoveryDto } from '@iot-workspace/interfaces';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
@@ -9,6 +9,16 @@ export class AuthController {
   @Post('login')
   public login(@Body() dto: ILoginDto): Promise<IAuthResponseDto> {
     return this.authService.login(dto);
+  }
+
+  @Post('activate')
+  public activate(@Body() dto: IActivationDto): Promise<IAuthResponseDto> {
+    return this.authService.activate(dto);
+  }
+
+  @Post('recover')
+  public recover(@Body() dto: IRecoveryDto): Promise<IAuthResponseDto> {
+    return this.authService.recover(dto);
   }
 
   @Post('setup-admin')

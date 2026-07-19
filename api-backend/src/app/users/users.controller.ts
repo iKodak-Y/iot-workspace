@@ -18,6 +18,16 @@ export class UsersController {
     return this.usersService.create(dto);
   }
 
+  @Get(':id/recovery-code')
+  getRecoveryCode(@Param('id') id: string) {
+    return this.usersService.getRecoveryCode(id);
+  }
+
+  @Post(':id/recovery-code/rotate')
+  rotateRecoveryCode(@Param('id') id: string) {
+    return this.usersService.rotateRecoveryCode(id);
+  }
+
   @Patch(':id/status')
   toggleStatus(@Param('id') id: string, @Body('estado') estado: boolean) {
     return this.usersService.toggleStatus(id, estado);

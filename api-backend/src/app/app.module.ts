@@ -7,6 +7,7 @@ import { AccessModule } from './access/access.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { CredentialsModule } from './credentials/credentials.module';
+import { ResidentModule } from './resident/resident.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { CredentialsModule } from './credentials/credentials.module';
     AuthModule,
     UsersModule,
     CredentialsModule,
+    ResidentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
