@@ -8,215 +8,224 @@ import { UsersService } from '../../core/users.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <div class="min-h-screen bg-slate-950 text-slate-100 relative overflow-x-hidden font-sans">
-      <!-- Ambient Glows -->
-      <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
-      <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-violet-500/5 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="min-h-screen bg-black text-slate-100 relative overflow-x-hidden font-sans pb-12">
 
       <!-- Main Content -->
-      <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+      <main class="max-w-7xl mx-auto px-6 py-10 relative z-10">
         <!-- Header -->
-        <div class="md:flex md:items-center md:justify-between mb-8">
-          <div class="flex-1 min-w-0">
-            <h1 class="text-2xl font-bold leading-7 text-white sm:text-3xl sm:truncate">
-              Gestión de Residentes
-            </h1>
-            <p class="mt-1 text-sm text-slate-400">
-              Administra la información y el acceso de los residentes y personal.
-            </p>
-          </div>
+        <div class="mb-10">
+          <h1 class="text-3xl font-bold tracking-tight text-white">
+            Gestión de Residentes
+          </h1>
+          <p class="mt-2 text-sm text-[#8E8E93]">
+            Administra la información y el acceso de los residentes y personal.
+          </p>
         </div>
 
         <!-- Error Message Alert -->
-        <div *ngIf="errorMessage()" class="mb-6 p-4 bg-red-950/30 border border-red-900/50 rounded-2xl text-sm text-red-400 flex items-center gap-2">
-          <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-          </svg>
+        <div *ngIf="errorMessage()" class="mb-8 p-4 bg-[#1C1C1E] border border-rose-900/50 rounded-2xl text-sm text-rose-400 flex items-center gap-3 shadow-lg">
+          <div class="w-8 h-8 rounded-full bg-rose-500/10 flex items-center justify-center shrink-0">
+            <svg class="h-5 w-5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+          </div>
           <span>{{ errorMessage() }}</span>
         </div>
 
-        <div *ngIf="activationInfo() as codes" class="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-200">
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p class="font-semibold">Códigos generados</p>
-              <p class="text-sm text-emerald-100/80">El temporal activa la cuenta por primera vez. El de recuperación sirve si cambia de teléfono o cierra sesión.</p>
+        <!-- Alerts -->
+        <div *ngIf="activationInfo() as codes" class="mb-8 p-6 bg-[#1C1C1E] border-l-4 border-emerald-500 rounded-2xl shadow-xl">
+          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold text-white mb-1">Nuevos códigos generados</h3>
+              <p class="text-sm text-[#8E8E93] leading-relaxed">El código temporal (6 dígitos) activa la cuenta por primera vez. El de recuperación (8 dígitos) sirve si el usuario cambia de teléfono o cierra sesión.</p>
             </div>
-            <div class="flex flex-col gap-2">
-              <div class="flex items-center gap-2 flex-wrap">
-                <span class="px-4 py-2 rounded-xl bg-slate-950/80 border border-emerald-500/20 font-mono text-lg tracking-[0.35em]">{{ codes.activationCode }}</span>
-                <button type="button" (click)="copyCode(codes.activationCode)" class="px-3 py-2 rounded-xl bg-slate-950/60 border border-emerald-500/20 text-sm text-emerald-100">Copiar activación</button>
+            <div class="flex flex-col gap-3 min-w-[280px]">
+              <div class="flex items-center justify-between gap-3 p-3 bg-[#09090b] rounded-xl border border-[#27272a]">
+                <span class="font-mono text-lg text-emerald-400 tracking-[0.2em] font-medium">{{ codes.activationCode }}</span>
+                <button type="button" (click)="copyCode(codes.activationCode)" class="text-xs font-semibold text-[#8E8E93] hover:text-white uppercase tracking-wider transition-colors">Copiar</button>
               </div>
-              <div class="flex items-center gap-2 flex-wrap">
-                <span class="px-4 py-2 rounded-xl bg-slate-950/80 border border-emerald-500/20 font-mono text-lg tracking-[0.35em]">{{ codes.recoveryCode }}</span>
-                <button type="button" (click)="copyCode(codes.recoveryCode)" class="px-3 py-2 rounded-xl bg-slate-950/60 border border-emerald-500/20 text-sm text-emerald-100">Copiar recuperación</button>
+              <div class="flex items-center justify-between gap-3 p-3 bg-[#09090b] rounded-xl border border-[#27272a]">
+                <span class="font-mono text-lg text-amber-400 tracking-[0.2em] font-medium">{{ codes.recoveryCode }}</span>
+                <button type="button" (click)="copyCode(codes.recoveryCode)" class="text-xs font-semibold text-[#8E8E93] hover:text-white uppercase tracking-wider transition-colors">Copiar</button>
               </div>
-              <button type="button" (click)="activationInfo.set(null)" class="px-3 py-2 rounded-xl bg-slate-950/60 border border-emerald-500/20 text-sm text-emerald-100 self-start">Cerrar</button>
+              <button type="button" (click)="activationInfo.set(null)" class="mt-2 text-sm text-[#0A84FF] hover:text-[#409cff] font-medium transition-colors text-right">Descartar mensaje</button>
             </div>
           </div>
         </div>
 
-        <div *ngIf="recoveryInfo() as recovery" class="mb-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-amber-100">
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <p class="font-semibold">Código de recuperación</p>
-              <p class="text-sm text-amber-100/80">Solo muéstralo cuando el residente lo pida. Si cambió de teléfono o sospechas exposición, reemítelo desde aquí.</p>
-              <p class="mt-1 text-xs text-amber-100/70">{{ recovery.user.nombreCompleto }}</p>
+        <div *ngIf="recoveryInfo() as recovery" class="mb-8 p-6 bg-[#1C1C1E] border-l-4 border-amber-500 rounded-2xl shadow-xl">
+          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold text-white mb-1">Código de recuperación</h3>
+              <p class="text-sm text-[#8E8E93] leading-relaxed">Solo muéstralo cuando el residente lo pida. Si cambió de teléfono o sospechas exposición, reemítelo desde aquí.</p>
+              <p class="mt-2 inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-[#27272a] text-slate-300">Usuario: {{ recovery.user.nombreCompleto }}</p>
             </div>
-            <div class="flex flex-col gap-2">
-              <div class="flex items-center gap-2 flex-wrap">
-                <span class="px-4 py-2 rounded-xl bg-slate-950/80 border border-amber-500/20 font-mono text-lg tracking-[0.35em]">{{ recovery.recoveryCode }}</span>
-                <button type="button" (click)="copyCode(recovery.recoveryCode)" class="px-3 py-2 rounded-xl bg-slate-950/60 border border-amber-500/20 text-sm text-amber-100">Copiar</button>
-                <button type="button" (click)="refreshRecoveryCode(recovery.user.id)" [disabled]="isRefreshingRecovery()" class="px-3 py-2 rounded-xl bg-slate-950/60 border border-amber-500/20 text-sm text-amber-100 disabled:opacity-50">
-                  <span *ngIf="!isRefreshingRecovery()">Reemitir</span>
-                  <span *ngIf="isRefreshingRecovery()">Reemitiendo...</span>
-                </button>
+            <div class="flex flex-col gap-3 min-w-[280px]">
+              <div class="flex items-center justify-between gap-3 p-3 bg-[#09090b] rounded-xl border border-[#27272a]">
+                <span class="font-mono text-lg text-amber-400 tracking-[0.2em] font-medium">{{ recovery.recoveryCode }}</span>
+                <button type="button" (click)="copyCode(recovery.recoveryCode)" class="text-xs font-semibold text-[#8E8E93] hover:text-white uppercase tracking-wider transition-colors">Copiar</button>
               </div>
-              <button type="button" (click)="recoveryInfo.set(null)" class="px-3 py-2 rounded-xl bg-slate-950/60 border border-amber-500/20 text-sm text-amber-100 self-start">Cerrar</button>
+              <div class="flex justify-between items-center mt-2">
+                <button type="button" (click)="refreshRecoveryCode(recovery.user.id)" [disabled]="isRefreshingRecovery()" class="text-sm text-[#0A84FF] hover:text-[#409cff] font-medium transition-colors disabled:opacity-50">
+                  <span *ngIf="!isRefreshingRecovery()">Reemitir código</span>
+                  <span *ngIf="isRefreshingRecovery()">Procesando...</span>
+                </button>
+                <button type="button" (click)="recoveryInfo.set(null)" class="text-sm text-[#8E8E93] hover:text-white transition-colors">Cerrar</button>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Top Section: Form -->
-        <div class="bg-slate-900/40 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-6 mb-8 shadow-2xl">
-          <h2 class="text-lg font-medium text-white mb-4">Registrar Nuevo Residente</h2>
-          <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="space-y-4 sm:space-y-0 sm:flex sm:gap-4 sm:items-start">
+        <div class="bg-[#1C1C1E] border border-[#2C2C2E] rounded-3xl p-6 md:p-8 mb-10 shadow-xl">
+          <h2 class="text-xl font-semibold text-white mb-6">Registrar Nuevo Residente</h2>
+          <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="flex flex-col md:flex-row gap-5 items-start">
             
-            <div class="flex-1">
-              <label for="nombreCompleto" class="block text-sm font-medium text-slate-400 mb-1">Nombre Completo</label>
+            <div class="flex-1 w-full">
+              <label for="nombreCompleto" class="block text-sm font-medium text-[#8E8E93] mb-2">Nombre Completo</label>
               <input type="text" id="nombreCompleto" formControlName="nombreCompleto" 
-                     class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors placeholder:text-slate-600 outline-none"
+                     class="w-full bg-[#09090b] border border-[#2C2C2E] rounded-xl px-4 py-3 text-[15px] text-white focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition-colors placeholder:text-[#636366] outline-none"
                      placeholder="Ej. Juan Pérez">
-              <div *ngIf="userForm.get('nombreCompleto')?.invalid && userForm.get('nombreCompleto')?.touched" class="mt-1 text-xs text-rose-400">
-                El nombre es obligatorio.
-              </div>
+              <div *ngIf="userForm.get('nombreCompleto')?.invalid && userForm.get('nombreCompleto')?.touched" class="mt-2 text-xs text-rose-400">Requerido</div>
             </div>
 
-            <div class="flex-1 flex gap-4">
-              <div class="flex-1">
-                <label for="bloque" class="block text-sm font-medium text-slate-400 mb-1">Bloque</label>
+            <div class="flex-1 w-full grid grid-cols-2 gap-4">
+              <div>
+                <label for="bloque" class="block text-sm font-medium text-[#8E8E93] mb-2">Bloque</label>
                 <input type="text" id="bloque" formControlName="bloque"
-                       class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors placeholder:text-slate-600 outline-none"
+                       class="w-full bg-[#09090b] border border-[#2C2C2E] rounded-xl px-4 py-3 text-[15px] text-white focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition-colors placeholder:text-[#636366] outline-none"
                        placeholder="Ej. 1">
-                <div *ngIf="userForm.get('bloque')?.invalid && userForm.get('bloque')?.touched" class="mt-1 text-xs text-rose-400">
-                  El bloque es obligatorio.
-                </div>
+                <div *ngIf="userForm.get('bloque')?.invalid && userForm.get('bloque')?.touched" class="mt-2 text-xs text-rose-400">Requerido</div>
               </div>
 
-              <div class="flex-1">
-                <label for="villa" class="block text-sm font-medium text-slate-400 mb-1">Villa</label>
+              <div>
+                <label for="villa" class="block text-sm font-medium text-[#8E8E93] mb-2">Villa</label>
                 <input type="text" id="villa" formControlName="villa"
-                       class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors placeholder:text-slate-600 outline-none"
+                       class="w-full bg-[#09090b] border border-[#2C2C2E] rounded-xl px-4 py-3 text-[15px] text-white focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition-colors placeholder:text-[#636366] outline-none"
                        placeholder="Ej. 14">
-                <div *ngIf="userForm.get('villa')?.invalid && userForm.get('villa')?.touched" class="mt-1 text-xs text-rose-400">
-                  La villa es obligatoria.
-                </div>
+                <div *ngIf="userForm.get('villa')?.invalid && userForm.get('villa')?.touched" class="mt-2 text-xs text-rose-400">Requerido</div>
               </div>
             </div>
 
-            <div class="sm:self-end sm:pb-0 sm:mt-0 mt-4 pt-6">
+            <div class="w-full md:w-auto md:self-end pt-2">
               <button type="submit" [disabled]="userForm.invalid || isSubmitting()"
-                      class="w-full sm:w-auto inline-flex justify-center items-center px-6 py-2.5 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-colors cursor-pointer disabled:cursor-not-allowed">
-                <svg *ngIf="isSubmitting()" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
+                      class="w-full md:w-auto inline-flex justify-center items-center px-8 py-3 rounded-xl text-[15px] font-semibold text-white bg-emerald-600 hover:bg-emerald-500 focus:outline-none disabled:opacity-50 transition-colors cursor-pointer disabled:cursor-not-allowed">
                 <span *ngIf="!isSubmitting()">Registrar</span>
-                <span *ngIf="isSubmitting()">Procesando...</span>
+                <span *ngIf="isSubmitting()">...</span>
               </button>
             </div>
           </form>
         </div>
 
         <!-- Bottom Section: Table -->
-        <div class="bg-slate-900/40 backdrop-blur-xl border border-slate-800/80 rounded-2xl overflow-hidden shadow-2xl">
+        <div class="bg-[#1C1C1E] border border-[#2C2C2E] rounded-3xl shadow-xl overflow-hidden">
           <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-800/60">
-              <thead class="bg-slate-950/40">
-                <tr>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Nombre</th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Bloque / Villa</th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Rol</th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Estado</th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Teléfono</th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Fecha de Registro</th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Acciones</th>
+            <!-- Replacing full table with a more structured list view -->
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-[#2C2C2E] bg-[#18181b]">
+                  <th class="px-6 py-4 text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">Residente</th>
+                  <th class="px-6 py-4 text-xs font-semibold text-[#8E8E93] uppercase tracking-wider hidden sm:table-cell">Unidad</th>
+                  <th class="px-6 py-4 text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">Estado</th>
+                  <th class="px-6 py-4 text-xs font-semibold text-[#8E8E93] uppercase tracking-wider hidden md:table-cell">Dispositivo</th>
+                  <th class="px-6 py-4 text-xs font-semibold text-[#8E8E93] uppercase tracking-wider text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-slate-800/40 bg-slate-900/10">
-                <tr *ngFor="let user of users()" class="hover:bg-slate-800/20 transition-colors">
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-200">
-                    {{ user.nombre_completo }}
+              <tbody class="divide-y divide-[#2C2C2E]">
+                <tr *ngFor="let user of users()" class="hover:bg-[#27272a]/40 transition-colors group">
+                  <!-- Col 1: Name and Date -->
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div class="h-10 w-10 rounded-full bg-gradient-to-tr from-slate-700 to-slate-800 flex items-center justify-center text-white font-bold text-sm mr-4 border border-[#3A3A3C]">
+                        {{ user.nombre_completo.charAt(0) | uppercase }}
+                      </div>
+                      <div>
+                        <div class="text-[15px] font-semibold text-white">{{ user.nombre_completo }}</div>
+                        <div class="text-xs text-[#8E8E93] mt-0.5">Registrado el {{ user.created_at | date:'dd/MM/yyyy' }}</div>
+                      </div>
+                    </div>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
-                    {{ user.bloque_villa }}
+                  
+                  <!-- Col 2: Unit (Hidden on very small screens) -->
+                  <td class="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
+                    <div class="text-[14px] text-slate-300 font-medium">{{ user.bloque_villa }}</div>
+                    <div class="text-xs text-[#8E8E93] mt-0.5 capitalize">{{ user.rol }}</div>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 capitalize">
-                      {{ user.rol }}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm">
-                    <span *ngIf="user.estado" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+
+                  <!-- Col 3: Status Badge -->
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span *ngIf="user.estado" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-2"></span>
                       Activo
                     </span>
-                    <span *ngIf="!user.estado" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                    <span *ngIf="!user.estado" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#2C2C2E] text-[#8E8E93] border border-[#3A3A3C]">
+                      <span class="w-1.5 h-1.5 rounded-full bg-[#8E8E93] mr-2"></span>
                       Suspendido
                     </span>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm">
-                    <span *ngIf="user.has_smartphone_credential && user.smartphone_credential_active" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-500/10 text-sky-300 border border-sky-500/20">
-                      Vinculado
-                    </span>
-                    <span *ngIf="user.has_smartphone_credential && !user.smartphone_credential_active" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-300 border border-amber-500/20">
-                      Inactivo
-                    </span>
-                    <span *ngIf="!user.has_smartphone_credential" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-500/10 text-slate-300 border border-slate-500/20">
-                      Solo tarjeta física
-                    </span>
+
+                  <!-- Col 4: Device Status (Hidden on med screens) -->
+                  <td class="px-6 py-4 whitespace-nowrap hidden md:table-cell">
+                    <div class="flex items-center gap-2">
+                      <svg *ngIf="user.has_smartphone_credential" class="w-4 h-4 text-[#8E8E93]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <rect x="5" y="2" width="14" height="20" rx="2" ry="2" stroke-width="2"></rect><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2"></line>
+                      </svg>
+                      <span class="text-sm text-slate-300" *ngIf="user.has_smartphone_credential && user.smartphone_credential_active">Vinculado</span>
+                      <span class="text-sm text-amber-400" *ngIf="user.has_smartphone_credential && !user.smartphone_credential_active">Inactivo</span>
+                      <span class="text-sm text-[#636366]" *ngIf="!user.has_smartphone_credential">Solo física</span>
+                    </div>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
-                    {{ user.created_at | date:'dd/MM/yyyy' }}
-                  </td>
+
+                  <!-- Col 5: Actions (Icon buttons to save space) -->
                   <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button *ngIf="user.estado" (click)="onToggleStatus(user)" class="text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 px-3 py-1.5 rounded-lg border border-rose-500/20 transition-colors mr-2">
-                      Suspender
-                    </button>
-                    <button *ngIf="!user.estado" (click)="onToggleStatus(user)" class="text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-lg border border-emerald-500/20 transition-colors mr-2">
-                      Activar
-                    </button>
-                    <button (click)="openCredentialModal(user)" class="text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 px-3 py-1.5 rounded-lg border border-indigo-500/20 transition-colors">
-                      Asignar Tarjeta
-                    </button>
-                    <button (click)="openViewCredentialsModal(user)" class="text-sky-400 hover:text-sky-300 bg-sky-500/10 hover:bg-sky-500/20 px-3 py-1.5 rounded-lg border border-sky-500/20 transition-colors ml-2">
-                      Ver Tarjetas
-                    </button>
-                    <button (click)="openRecoveryModal(user)" class="text-amber-300 hover:text-amber-200 bg-amber-500/10 hover:bg-amber-500/20 px-3 py-1.5 rounded-lg border border-amber-500/20 transition-colors ml-2">
-                      Ver recuperación
-                    </button>
+                    <div class="flex items-center justify-end gap-1 opacity-100 sm:opacity-40 sm:group-hover:opacity-100 transition-opacity">
+                      
+                      <!-- Toggle Status -->
+                      <button (click)="onToggleStatus(user)" class="p-2 rounded-lg hover:bg-[#2C2C2E] text-[#8E8E93] hover:text-white transition-colors" [title]="user.estado ? 'Suspender' : 'Activar'">
+                        <svg *ngIf="user.estado" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+                        <svg *ngIf="!user.estado" class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      </button>
+                      
+                      <!-- Assign Credential -->
+                      <button (click)="openCredentialModal(user)" class="p-2 rounded-lg hover:bg-[#2C2C2E] text-[#8E8E93] hover:text-emerald-400 transition-colors" title="Asignar Credencial">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4" /></svg>
+                      </button>
+
+                      <!-- View Credentials -->
+                      <button (click)="openViewCredentialsModal(user)" class="p-2 rounded-lg hover:bg-[#2C2C2E] text-[#8E8E93] hover:text-white transition-colors" title="Ver Tarjetas">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                      </button>
+
+                      <!-- Recovery Code -->
+                      <button (click)="openRecoveryModal(user)" class="p-2 rounded-lg hover:bg-[#2C2C2E] text-[#8E8E93] hover:text-amber-400 transition-colors" title="Código de Recuperación">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+                      </button>
+
+                    </div>
                   </td>
                 </tr>
 
                 <!-- Loading State -->
                 <tr *ngIf="isLoading()">
-                  <td colspan="7" class="px-6 py-12 text-center">
-                    <div class="flex items-center justify-center gap-3 text-slate-400 text-sm">
-                      <svg class="animate-spin h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      <span>Cargando usuarios...</span>
+                  <td colspan="5" class="px-6 py-16 text-center">
+                    <div class="flex flex-col items-center justify-center gap-4">
+                      <div class="w-8 h-8 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin"></div>
+                      <span class="text-[#8E8E93] font-medium">Cargando residentes...</span>
                     </div>
                   </td>
                 </tr>
                 
                 <!-- Empty State -->
                 <tr *ngIf="!isLoading() && users().length === 0">
-                  <td colspan="7" class="px-6 py-12 text-center">
+                  <td colspan="5" class="px-6 py-16 text-center">
                     <div class="flex flex-col items-center justify-center">
-                      <svg class="h-10 w-10 text-slate-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                      </svg>
-                      <p class="text-sm text-slate-400 font-medium">No hay usuarios registrados</p>
+                      <div class="w-16 h-16 bg-[#27272a] rounded-full flex items-center justify-center mb-4">
+                        <svg class="h-8 w-8 text-[#8E8E93]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                      </div>
+                      <p class="text-[15px] text-white font-medium">No hay residentes registrados</p>
+                      <p class="text-sm text-[#8E8E93] mt-1">Registra al primer residente usando el formulario de arriba.</p>
                     </div>
                   </td>
                 </tr>
@@ -226,91 +235,82 @@ import { UsersService } from '../../core/users.service';
         </div>
       </main>
 
-      <!-- Modal Overlay -->
-      <div *ngIf="isModalOpen()" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl relative">
-          <h3 class="text-lg font-medium text-white mb-4">
-            Asignar Tarjeta a {{ selectedUser()?.nombre_completo }}
-          </h3>
-          <form [formGroup]="credentialForm" (ngSubmit)="onAssignCredential()" class="space-y-4">
+      <!-- Modal Overlay: Assign Credential -->
+      <div *ngIf="isModalOpen()" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+        <div class="bg-[#1C1C1E] border border-[#2C2C2E] rounded-3xl p-8 w-full max-w-md shadow-2xl relative transform transition-all">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-semibold text-white">Vincular Llave</h3>
+            <button (click)="closeModal()" class="text-[#8E8E93] hover:text-white transition-colors bg-[#2C2C2E] rounded-full p-1.5">
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+          
+          <p class="text-sm text-[#8E8E93] mb-6">Añadiendo llave para <span class="text-white font-medium">{{ selectedUser()?.nombre_completo }}</span></p>
+
+          <form [formGroup]="credentialForm" (ngSubmit)="onAssignCredential()" class="space-y-5">
             <div>
-              <label for="uidHex" class="block text-sm font-medium text-slate-400 mb-1">UID (Hexadecimal)</label>
+              <label for="uidHex" class="block text-sm font-medium text-[#8E8E93] mb-2">UID (Hexadecimal)</label>
               <input type="text" id="uidHex" formControlName="uidHex" autofocus
-                     class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-colors"
-                     placeholder="Escanee la tarjeta o digite el UID">
-              <div *ngIf="credentialForm.get('uidHex')?.invalid && credentialForm.get('uidHex')?.touched" class="mt-1 text-xs text-rose-400">
-                El UID es obligatorio.
-              </div>
+                     class="w-full bg-[#09090b] border border-[#2C2C2E] rounded-xl px-4 py-3 text-[15px] text-white focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors"
+                     placeholder="Ej. A1 B2 C3 D4">
             </div>
             
             <div>
-              <label for="tipo" class="block text-sm font-medium text-slate-400 mb-1">Tipo de Credencial</label>
+              <label for="tipo" class="block text-sm font-medium text-[#8E8E93] mb-2">Tipo de Llave</label>
               <select id="tipo" formControlName="tipo"
-                      class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-colors">
-                <option value="tag_fisico">Tag Físico (RFID/NFC)</option>
-                <option value="smartphone_nfc">Smartphone NFC</option>
+                      class="w-full bg-[#09090b] border border-[#2C2C2E] rounded-xl px-4 py-3 text-[15px] text-white focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors appearance-none">
+                <option value="tag_fisico">Tarjeta o Llavero Físico</option>
+                <option value="smartphone_nfc">Teléfono (NFC)</option>
               </select>
             </div>
 
-            <div class="mt-6 flex justify-end gap-3">
-              <button type="button" (click)="closeModal()" class="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors cursor-pointer">
-                Cancelar
-              </button>
+            <div class="mt-8 pt-4 border-t border-[#2C2C2E]">
               <button type="submit" [disabled]="credentialForm.invalid || isAssigning()"
-                      class="inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-colors cursor-pointer disabled:cursor-not-allowed">
-                <svg *ngIf="isAssigning()" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span *ngIf="!isAssigning()">Vincular Credencial</span>
-                <span *ngIf="isAssigning()">Asignando...</span>
+                      class="w-full inline-flex justify-center items-center px-6 py-3.5 rounded-xl text-[15px] font-semibold text-black bg-white hover:bg-slate-200 focus:outline-none disabled:opacity-50 transition-colors cursor-pointer disabled:cursor-not-allowed">
+                <span *ngIf="!isAssigning()">Vincular y Guardar</span>
+                <span *ngIf="isAssigning()">Procesando...</span>
               </button>
             </div>
           </form>
         </div>
       </div>
 
-      <!-- View Credentials Modal -->
-      <div *ngIf="isViewCredentialsModalOpen()" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-2xl shadow-2xl relative max-h-[80vh] overflow-y-auto">
+      <!-- Modal Overlay: View Credentials -->
+      <div *ngIf="isViewCredentialsModalOpen()" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+        <div class="bg-[#1C1C1E] border border-[#2C2C2E] rounded-3xl p-8 w-full max-w-lg shadow-2xl relative max-h-[85vh] overflow-y-auto">
           <div class="flex justify-between items-center mb-6">
-            <h3 class="text-lg font-medium text-white">
-              Tarjetas de {{ selectedUser()?.nombre_completo }}
-            </h3>
-            <button (click)="closeViewCredentialsModal()" class="text-slate-400 hover:text-white cursor-pointer">
-              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+            <h3 class="text-xl font-semibold text-white">Llaves Vinculadas</h3>
+            <button (click)="closeViewCredentialsModal()" class="text-[#8E8E93] hover:text-white transition-colors bg-[#2C2C2E] rounded-full p-1.5">
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
           
-          <div *ngIf="isLoadingCredentials()" class="flex justify-center py-8">
-            <svg class="animate-spin h-8 w-8 text-indigo-400" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
+          <p class="text-sm text-[#8E8E93] mb-6">Llaves asignadas a <span class="text-white font-medium">{{ selectedUser()?.nombre_completo }}</span></p>
+
+          <div *ngIf="isLoadingCredentials()" class="flex justify-center py-10">
+            <div class="w-8 h-8 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin"></div>
           </div>
 
-          <div *ngIf="!isLoadingCredentials() && userCredentials().length === 0" class="text-center py-8 text-slate-400">
-            No hay tarjetas registradas para este usuario.
+          <div *ngIf="!isLoadingCredentials() && userCredentials().length === 0" class="text-center py-10">
+            <p class="text-[15px] text-[#8E8E93]">No hay llaves registradas</p>
           </div>
 
-          <div *ngIf="!isLoadingCredentials() && userCredentials().length > 0" class="space-y-4">
-            <div *ngFor="let cred of userCredentials()" class="flex items-center justify-between bg-slate-950/50 p-4 rounded-xl border border-slate-800">
-              <div>
-                <p class="font-mono text-lg text-slate-200">{{ cred.uid_hex }}</p>
-                <div class="flex items-center gap-3 mt-1">
-                  <span class="text-xs text-slate-400 capitalize">{{ cred.tipo.replace('_', ' ') }}</span>
-                  <span class="text-xs text-slate-500">{{ cred.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+          <div *ngIf="!isLoadingCredentials() && userCredentials().length > 0" class="space-y-3">
+            <div *ngFor="let cred of userCredentials()" class="flex items-center justify-between bg-[#09090b] p-4 rounded-2xl border border-[#2C2C2E]">
+              <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-full bg-[#1C1C1E] flex items-center justify-center border border-[#27272a]">
+                  <svg *ngIf="cred.tipo === 'tag_fisico'" class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                  <svg *ngIf="cred.tipo === 'smartphone_nfc'" class="w-5 h-5 text-[#0A84FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="5" y="2" width="14" height="20" rx="2" ry="2" stroke-width="1.5"></rect><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2"></line></svg>
+                </div>
+                <div>
+                  <p class="font-mono text-[15px] font-medium text-white">{{ cred.uid_hex }}</p>
+                  <p class="text-xs text-[#8E8E93] mt-0.5">{{ cred.tipo === 'tag_fisico' ? 'Tarjeta Física' : 'Smartphone' }} • {{ cred.created_at | date:'dd MMM' }}</p>
                 </div>
               </div>
               <button (click)="deleteCredential(cred.id)" [disabled]="isDeletingCredential() === cred.id"
-                      class="text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 px-3 py-2 rounded-lg border border-rose-500/20 transition-colors disabled:opacity-50 flex items-center gap-2 cursor-pointer">
-                <svg *ngIf="isDeletingCredential() === cred.id" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span>Desvincular</span>
+                      class="text-rose-500 hover:text-rose-400 p-2 rounded-xl hover:bg-[#2C2C2E] transition-colors disabled:opacity-50 cursor-pointer" title="Remover llave">
+                <svg *ngIf="isDeletingCredential() !== cred.id" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                <div *ngIf="isDeletingCredential() === cred.id" class="w-5 h-5 border-2 border-rose-500/30 border-t-rose-500 rounded-full animate-spin"></div>
               </button>
             </div>
           </div>

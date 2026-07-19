@@ -1,113 +1,127 @@
-<div class="resident-shell">
-	<div class="hero-glow hero-glow-left"></div>
-	<div class="hero-glow hero-glow-right"></div>
-
-	<section *ngIf="!isAuthenticated(); else residentHome" class="auth-shell">
-		<div class="auth-badge">Resident App</div>
-		<h1>{{ mode() === 'activate' ? 'Activa tu tarjeta NFC digital' : 'Recupera tu cuenta' }}</h1>
-		<p *ngIf="mode() === 'activate'">Ingresa el código temporal de 6 dígitos que te dio el administrador para vincular tu teléfono.</p>
-		<p *ngIf="mode() === 'recover'">Si cambiaste de teléfono o cerraste sesión, usa tu código de recuperación de 8 dígitos.</p>
-
-		<div class="mode-switch">
-			<button type="button" class="mode-button" [class.active]="mode() === 'activate'" (click)="setMode('activate')">Activar</button>
-			<button type="button" class="mode-button" [class.active]="mode() === 'recover'" (click)="setMode('recover')">Recuperar</button>
+<div class="wallet-app">
+	<!-- AUTH MODE -->
+	<section *ngIf="!isAuthenticated(); else residentHome" class="wallet-auth-view">
+		<div class="auth-header">
+			<div class="auth-icon-container">
+				<div class="auth-icon"></div>
+			</div>
+			<h1>{{ mode() === 'activate' ? 'Añadir credencial' : 'Recuperar credencial' }}</h1>
+			<p *ngIf="mode() === 'activate'">Ingresa el código temporal para activar tu llave digital y agregarla a tu wallet.</p>
+			<p *ngIf="mode() === 'recover'">Usa tu código de 8 dígitos para restaurar tu llave en este dispositivo.</p>
 		</div>
 
-		<div class="auth-card">
-			<div class="card-body">
-				<form *ngIf="mode() === 'activate'" [formGroup]="activationForm" (ngSubmit)="activate()" class="form-stack">
-					<label class="field-label" for="activationCode">Código de activación</label>
-					<input id="activationCode" class="field-input" formControlName="activationCode" inputmode="numeric" maxlength="6" placeholder="123456" />
+		<div class="auth-content">
+			<form *ngIf="mode() === 'activate'" [formGroup]="activationForm" (ngSubmit)="activate()" class="wallet-form">
+				<div class="input-group">
+					<input id="activationCode" type="text" class="wallet-input" formControlName="activationCode" inputmode="numeric" maxlength="6" placeholder="Código de 6 dígitos" />
+				</div>
+				<p class="wallet-error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
+				<button class="wallet-btn-primary" type="submit" [disabled]="activationForm.invalid || isActivating()">
+					<span *ngIf="!isActivating()">Continuar</span>
+					<span *ngIf="isActivating()">Verificando...</span>
+				</button>
+			</form>
 
-					<p class="error-text" *ngIf="errorMessage()">{{ errorMessage() }}</p>
-
-					<button class="primary-button" type="submit" [disabled]="activationForm.invalid || isActivating()">
-						<span *ngIf="!isActivating()">Activar y entrar</span>
-						<span *ngIf="isActivating()">Activando...</span>
-					</button>
-				</form>
-
-				<form *ngIf="mode() === 'recover'" [formGroup]="recoveryForm" (ngSubmit)="recover()" class="form-stack">
-					<label class="field-label" for="recoveryCode">Código de recuperación</label>
-					<input id="recoveryCode" class="field-input" formControlName="recoveryCode" inputmode="numeric" maxlength="8" placeholder="12345678" />
-
-					<p class="error-text" *ngIf="errorMessage()">{{ errorMessage() }}</p>
-
-					<button class="primary-button" type="submit" [disabled]="recoveryForm.invalid || isRecovering()">
-						<span *ngIf="!isRecovering()">Recuperar acceso</span>
-						<span *ngIf="isRecovering()">Recuperando...</span>
-					</button>
-				</form>
-			</div>
+			<form *ngIf="mode() === 'recover'" [formGroup]="recoveryForm" (ngSubmit)="recover()" class="wallet-form">
+				<div class="input-group">
+					<input id="recoveryCode" type="text" class="wallet-input" formControlName="recoveryCode" inputmode="numeric" maxlength="8" placeholder="Código de 8 dígitos" />
+				</div>
+				<p class="wallet-error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
+				<button class="wallet-btn-primary" type="submit" [disabled]="recoveryForm.invalid || isRecovering()">
+					<span *ngIf="!isRecovering()">Continuar</span>
+					<span *ngIf="isRecovering()">Verificando...</span>
+				</button>
+			</form>
+		</div>
+		
+		<div class="auth-footer">
+			<button type="button" class="wallet-btn-text" (click)="setMode(mode() === 'activate' ? 'recover' : 'activate')">
+				{{ mode() === 'activate' ? '¿Ya tienes una cuenta? Recupérala' : '¿No tienes cuenta? Actívala' }}
+			</button>
 		</div>
 	</section>
 
+	<!-- HOME MODE -->
 	<ng-template #residentHome>
-		<section class="home-shell">
-			<div style="background: linear-gradient(135deg, #6366f1, #a855f7); color: white; padding: 20px; text-align: center; border-radius: 16px; margin-bottom: 24px; box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);">
-				<h3 style="margin-top: 0; margin-bottom: 12px; font-size: 1.2rem;">Puerta Principal</h3>
-				<button type="button" (click)="openRemoteDoor()" [disabled]="isOpeningDoor()"
-						style="background: white; color: #6366f1; border: none; padding: 14px 24px; font-size: 1.1rem; font-weight: bold; border-radius: 12px; width: 100%; cursor: pointer; transition: transform 0.1s;"
-						onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">
-					<span *ngIf="!isOpeningDoor()">🚪 ABRIR PUERTA AHORA</span>
-					<span *ngIf="isOpeningDoor()">Abriendo...</span>
-				</button>
-			</div>
-			<div class="topbar">
-				<div>
-					<p class="eyebrow">Acceso residencial</p>
-					<h1>{{ profile()?.nombreCompleto || 'Residente' }}</h1>
-					<p class="subtle">{{ profile()?.bloqueVilla || 'Bloque / Villa pendiente' }}</p>
+		<section class="wallet-home-view">
+			<header class="wallet-header">
+				<div class="wallet-header-content">
+					<h1>Wallet</h1>
+					<button class="wallet-icon-btn" type="button" (click)="logout()" title="Cerrar sesión">
+						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+					</button>
 				</div>
-				<button class="ghost-button" type="button" (click)="logout()">Salir</button>
-			</div>
+			</header>
 
-			<div class="info-card nfc-card">
-				<div class="card-body">
-					<p class="card-kicker">Credencial digital</p>
-					<h2 class="card-title">{{ profile()?.rol | titlecase }}</h2>
-					<div class="chip-row">
-						<span class="status-chip" [class.active]="profile()?.estado">{{ profile()?.estado ? 'Activa' : 'Suspendida' }}</span>
-						<span class="status-chip outline">{{ credentials().length }} credencial(es)</span>
-					</div>
-
-					<div class="uid-panel mobile-token-panel">
-						<p class="uid-label">Token NFC del teléfono</p>
-						<h2>{{ deviceToken() || 'Sin vincular' }}</h2>
-						<p class="uid-type">
-							{{ deviceToken() ? 'Este teléfono está vinculado' : (smartphoneCredential() ? 'La cuenta ya tiene una credencial móvil activa. Vincula este teléfono para reemplazarla.' : 'Vincula este teléfono para usarlo como credencial digital') }}
-						</p>
-						<button class="primary-button secondary" type="button" (click)="bindThisPhone()" [disabled]="isBindingDevice() || isLoading()">
-							<span *ngIf="!isBindingDevice()">{{ deviceToken() ? 'Renovar token del teléfono' : 'Vincular este teléfono' }}</span>
-							<span *ngIf="isBindingDevice()">Vinculando...</span>
-						</button>
-					</div>
-
-					<div class="uid-panel" *ngIf="credentials().length > 0; else noCredentials">
-						<p class="uid-label">UID principal</p>
-						<h2>{{ credentials()[0]?.uidHex }}</h2>
-						<p class="uid-type">{{ credentials()[0]?.tipo === 'smartphone_nfc' ? 'Teléfono NFC' : 'Tarjeta física' }}</p>
-					</div>
-
-					<ng-template #noCredentials>
-						<div class="empty-state">
-							<p>Aún no tienes una credencial asignada.</p>
-							<span>El administrador debe vincular tu usuario con un UID.</span>
+			<div class="wallet-stack">
+				<!-- PASS CARD -->
+				<div class="wallet-pass" [ngClass]="profile()?.estado ? 'pass-active' : 'pass-suspended'">
+					<div class="pass-header">
+						<div class="pass-logo">
+							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+							<span>Residencial</span>
 						</div>
-					</ng-template>
+						<div class="pass-type">
+							{{ profile()?.rol | uppercase }}
+						</div>
+					</div>
+					
+					<div class="pass-body">
+						<div class="pass-field">
+							<span class="field-label">Nombre</span>
+							<span class="field-value">{{ profile()?.nombreCompleto || 'Residente' }}</span>
+						</div>
+						<div class="pass-field">
+							<span class="field-label">Unidad</span>
+							<span class="field-value">{{ profile()?.bloqueVilla || 'Por asignar' }}</span>
+						</div>
+					</div>
 
-					<button class="primary-button" type="button" (click)="loadProfile()" [disabled]="isLoading()">
-						<span *ngIf="!isLoading()">Actualizar credencial</span>
+					<div class="pass-footer">
+						<div class="nfc-icon">
+							<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 12v.01M8 9.5a5 5 0 0 1 0 5M12 7a9 9 0 0 1 0 10M16 4.5a14 14 0 0 1 0 15"></path></svg>
+						</div>
+						<span class="status-indicator">{{ profile()?.estado ? 'Activa' : 'Suspendida' }}</span>
+					</div>
+				</div>
+
+				<!-- Secondary Details -->
+				<div class="wallet-details">
+					<div class="detail-row" *ngIf="credentials().length > 0">
+						<span class="detail-label">UID Tarjeta</span>
+						<span class="detail-val">{{ credentials()[0]?.uidHex }}</span>
+					</div>
+					<div class="detail-row">
+						<span class="detail-label">Dispositivo</span>
+						<span class="detail-val">{{ deviceToken() ? 'Vinculado' : 'No vinculado' }}</span>
+					</div>
+				</div>
+
+				<div class="wallet-actions">
+					<button class="wallet-btn-secondary" type="button" (click)="bindThisPhone()" [disabled]="isBindingDevice() || isLoading()">
+						<svg *ngIf="!isBindingDevice()" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+						<span *ngIf="!isBindingDevice()">{{ deviceToken() ? 'Renovar Dispositivo' : 'Vincular Dispositivo' }}</span>
+						<span *ngIf="isBindingDevice()">Vinculando...</span>
+					</button>
+					
+					<button class="wallet-btn-secondary" type="button" (click)="loadProfile()" [disabled]="isLoading()">
+						<svg *ngIf="!isLoading()" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+						<span *ngIf="!isLoading()">Actualizar</span>
 						<span *ngIf="isLoading()">Actualizando...</span>
 					</button>
 				</div>
 			</div>
 
-			<div class="info-card">
-				<div class="card-body">
-					<h3>Cómo se usará</h3>
-					<p>En la siguiente fase, esta pantalla se conectará con la función NFC nativa de Android para emular o presentar la credencial del residente.</p>
-				</div>
+			<!-- Floating action button at the bottom -->
+			<div class="wallet-fab-container">
+				<button class="wallet-fab" type="button" (click)="openRemoteDoor()" [disabled]="isOpeningDoor()">
+					<div class="fab-content">
+						<svg *ngIf="!isOpeningDoor()" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"></path><path d="M2 20h20"></path><path d="M14 12v.01"></path></svg>
+						<div class="fab-spinner" *ngIf="isOpeningDoor()"></div>
+						<span *ngIf="!isOpeningDoor()">Abrir Puerta</span>
+						<span *ngIf="isOpeningDoor()">Abriendo...</span>
+					</div>
+				</button>
 			</div>
 		</section>
 	</ng-template>
