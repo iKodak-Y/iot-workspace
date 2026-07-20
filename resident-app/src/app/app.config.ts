@@ -4,7 +4,9 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { appRoutes } from './app.routes';
 import { IonicModule } from '@ionic/angular';
 
-export const apiBaseUrl = 'http://192.168.1.4:3000/api';
+import { environment } from '../environments/environment';
+
+export const apiBaseUrl = environment.apiUrl;
 
 export const appConfig: ApplicationConfig = {
   providers: [

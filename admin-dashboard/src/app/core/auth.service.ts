@@ -8,13 +8,15 @@ interface LoginResponse {
   accessToken: string;
 }
 
+import { environment } from '../../environments/environment';
+
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
-  private readonly apiUrl = 'http://localhost:3000/api';
+  private readonly apiUrl = environment.apiUrl;
 
   /**
    * Realiza el inicio de sesión del usuario.

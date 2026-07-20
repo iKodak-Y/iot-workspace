@@ -1,13 +1,15 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
+import { environment } from '../../environments/environment';
+
 @Injectable({
   providedIn: 'root',
 })
 export class UsersService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:3000/api/users';
-  private readonly credentialsUrl = 'http://localhost:3000/api/credentials';
+  private readonly apiUrl = `${environment.apiUrl}/users`;
+  private readonly credentialsUrl = `${environment.apiUrl}/credentials`;
 
   private getHeaders() {
     const token = localStorage.getItem('iot_token');

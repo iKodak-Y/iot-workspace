@@ -7,10 +7,10 @@ import { RouterModule, Router } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <div class="min-h-screen flex bg-black text-slate-100 font-sans">
+    <div class="h-screen overflow-hidden flex bg-black text-slate-100 font-sans">
       
       <!-- Sidebar -->
-      <aside class="w-64 bg-[#09090b] border-r border-[#27272a] flex flex-col z-20">
+      <aside class="w-64 shrink-0 bg-[#09090b] border-r border-[#27272a] flex flex-col z-20">
         <!-- Brand Logo/Name -->
         <div class="h-20 flex items-center px-6 border-b border-[#27272a]">
           <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 mr-3">
